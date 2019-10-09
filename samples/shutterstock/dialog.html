@@ -1,0 +1,131 @@
+<!--
+Copyright 2019 Hippo B.V. (http://www.onehippo.com)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>BloomReach Bynder Extension Dialog</title>
+
+  <script src="https://unpkg.com/@bloomreach/ui-extension@13.2.0/dist/ui-extension.min.js"></script>
+</head>
+
+<body>
+  <div id="bynder-config"></div>
+  <script src="https://s.picdn.net/editor/image/assets/integration.js"></script>
+  <script>
+
+    (ui => {
+      document.addEventListener('DOMContentLoaded', async () => {
+        try {
+          ui = await UiExtension.register();
+          const options = await ui.dialog.options();
+
+          const ssOptions = JSON.parse(options.value);
+          console.log(ssOptions)
+
+          ssOptions.onClose = function () {
+            console.log('LOG LOG LOG LOG LOG')
+          };
+          ssOptions.onPrimaryAction = function () {
+            // window.editor.ui.showActivityIndicator();
+            // window.editor.getBase64({
+            //   format: 'jpg',
+            //   quality: .91
+            // }).then(function(base64) {
+            //   target.setAttribute('src', base64);
+            //   window.editor.hide();
+            // });
+            /////////////
+            if (ui == null) {
+              console.log("UI Extension not properly registered");
+              return;
+            }
+            var img = {};
+            editorInstance.getDesign().then(function (layers) {
+              img.layers = JSON.stringify(layers);
+              editorInstance.getBase64({
+                format: 'jpg',
+                quality: .91
+              }).then(function (base64) {
+                //ui.dialog.close(JSON.stringify("{test:'ola'}"));
+                img.canvas = base64;
+                ui.dialog.close(img);
+                //target.setAttribute('src', base64);
+                editorInstance.hide();
+              });
+
+
+              //ui.dialog.close(img);
+            });
+
+
+            // The selected assets go in the event detail property
+            // const selectedAssets = e.detail;
+            //ui.dialog.close(JSON.stringify(selectedAssets));
+            /////////////
+
+            console.log('DONE DONE DONE DONE')
+            // editorInstance.ui.showActivityIndicator().then(() => editorInstance.getBase64({
+            //   format: 'jpg',
+            //   quality: .91
+            // }))
+            //   .then((base64) => {
+            //     // do something with the base64 data
+            //   })
+            //   .then(editorInstance.ui.hideActivityIndicator)
+            //   .then(editorInstance.hide);
+          }
+
+
+          /////////////////////////
+          var editorInstance = window.Editor(ssOptions);
+
+          // Launch instance of Editor
+          editorInstance.launch().then(function (editor) {
+            // Editor is loaded and ready for user interaction
+          }).catch(function (err) {
+            // Handle error
+          });
+          ////////////////////////
+
+
+        } catch (error) {
+          console.error('Failed to register extension:', error.message);
+          console.error('- error code:', error.code);
+        }
+      });
+
+      document.addEventListener('BynderAddMedia', function (e) {
+        if (ui == null) {
+          console.log("UI Extension not properly registered");
+          return;
+        }
+
+        // The selected assets go in the event detail property
+        const selectedAssets = e.detail;
+        ui.dialog.close(JSON.stringify(selectedAssets));
+      });
+
+    })();
+
+
+  </script>
+</body>
+
+</html>
